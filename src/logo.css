@@ -1,0 +1,30 @@
+.brand-logo {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  border: 2px solid #273127;
+  border-radius: 50%;
+  background-color: #35472d;
+  background-image: url('../kutakInstagram.PNG');
+  background-repeat: no-repeat;
+  background-size: 455px 228px;
+  background-position: -99px -18px;
+  box-shadow: inset 0 0 0 2px rgba(8, 14, 12, .6);
+}
+
+.footer-brand .brand-logo {
+  width: 46px;
+  height: 46px;
+  background-size: 403px 201px;
+  background-position: -88px -16px;
+}
+
+@media (max-width: 400px) {
+  .navbar-brand .brand-logo {
+    width: 46px;
+    height: 46px;
+    background-size: 403px 201px;
+    background-position: -88px -16px;
+  }
+}
