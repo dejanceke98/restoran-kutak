@@ -37,18 +37,10 @@ Otvorite adresu koju Vite ispiše u terminalu (podrazumevano `http://localhost:5
 
 - `GET /api/health` — provera dostupnosti API-ja
 - `GET /api/menu` — jela i cene
-- `POST /api/reservations` — validacija i prijem rezervacije
+- `GET /api/drinks` — pića i cene
 
 Frontend očekuje API na `http://localhost:5000`. Drugi API URL može se postaviti kroz `VITE_API_URL` u `.env` fajlu.
 
-## Slanje rezervacija e-mailom
-
-Flask šalje e-mail restoranu pre nego što potvrdi prijem rezervacije. SMTP parametre postavite u `.env` fajlu u glavnom direktorijumu projekta (primer je u `.env.example`). Nemojte deliti niti commit-ovati `.env` fajl; lozinku čuvajte kao tajnu.
-
-Primer za Gmail: uključite verifikaciju u 2 koraka na Google nalogu i koristite Google App Password kao `SMTP_PASSWORD` (ne običnu lozinku naloga). Za druge provajdere unesite njihove SMTP podatke.
-
-Posle promene `.env` fajla restartujte Flask. Ako SMTP podešavanja nedostaju ili slanje ne uspe, API vraća grešku i rezervacija se ne potvrđuje kao poslata.
-
 ## Napomena
 
-Rezervacije se trenutno čuvaju samo u memoriji procesa Flask-a. Podaci se brišu kada se server restartuje; ovo je demonstraciona implementacija, nije trajna produkcijska evidencija. Adresa, telefon i meni su primeri i mogu se zameniti stvarnim podacima restorana.
+Meni, karta pića, adresa i telefon su primeri i mogu se zameniti stvarnim podacima restorana.

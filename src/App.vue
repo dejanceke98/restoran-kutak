@@ -1,15 +1,11 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import drinksData from '../drinks.json'
 import menuData from '../menu.json'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 const menu = ref([])
-const apiOnline = ref(false)
-const sending = ref(false)
-const notice = ref('')
-const noticeType = ref('success')
-const today = new Date().toISOString().slice(0, 10)
-const form = reactive({ name: '', phone: '', date: '', time: '19:00', guests: '2', note: '' })
+const drinks = ref([])
 
 const menuCategories = computed(() => {
   const grouped = new Map()
@@ -19,45 +15,30 @@ const menuCategories = computed(() => {
   }
   return Array.from(grouped, ([name, items]) => ({ name, items }))
 })
-const formattedDate = computed(() => form.date ? new Date(`${form.date}T12:00:00`).toLocaleDateString('sr-RS') : '')
-
+const drinkCategories = computed(() => {
+  const grouped = new Map()
+  for (const drink of drinks.value) {
+    if (!grouped.has(drink.category)) grouped.set(drink.category, [])
+    grouped.get(drink.category).push(drink)
+  }
+  return Array.from(grouped, ([name, items]) => ({ name, items }))
+})
 onMounted(async () => {
   try {
-    const [health, dishes] = await Promise.all([
+    const [health, dishes, beverages] = await Promise.all([
       fetch(`${API_URL}/api/health`),
       fetch(`${API_URL}/api/menu`),
+      fetch(`${API_URL}/api/drinks`),
     ])
-    if (!health.ok || !dishes.ok) throw new Error('API nije dostupan')
+    if (!health.ok || !dishes.ok || !beverages.ok) throw new Error('API nije dostupan')
     menu.value = await dishes.json()
-    apiOnline.value = true
+    drinks.value = await beverages.json()
   } catch {
     menu.value = menuData
+    drinks.value = drinksData
   }
 })
 
-async function submitReservation() {
-  notice.value = ''
-  sending.value = true
-  try {
-    const response = await fetch(`${API_URL}/api/reservations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    const result = await response.json()
-    if (!response.ok) throw new Error(result.error || 'Rezervacija nije poslata.')
-    noticeType.value = 'success'
-    notice.value = `${result.message} Hvala, ${form.name}! Sto za ${form.guests} ${Number(form.guests) === 1 ? 'osobu' : 'osobe'} tražen je za ${formattedDate.value} u ${form.time}.`
-    Object.assign(form, { name: '', phone: '', date: '', time: '19:00', guests: '2', note: '' })
-  } catch (error) {
-    noticeType.value = 'danger'
-    notice.value = error instanceof TypeError
-      ? 'Ne možemo da se povežemo sa serverom. Proverite da li je Flask pokrenut.'
-      : error.message
-  } finally {
-    sending.value = false
-  }
-}
 </script>
 
 <template>
@@ -74,9 +55,9 @@ async function submitReservation() {
         <div id="mainNav" class="collapse navbar-collapse">
           <div class="navbar-nav ms-auto align-items-lg-center gap-lg-4">
             <a class="nav-link" href="#meni">Naš meni</a>
+            <a class="nav-link" href="#pica">Karta pića</a>
             <a class="nav-link" href="#prica">Naša priča</a>
-            <a class="nav-link" href="#poseta">Pronađite nas</a>
-            <a class="btn btn-brand nav-book" href="#rezervacija">Rezervišite sto <span aria-hidden="true">↗</span></a>
+            <a class="btn btn-brand nav-book" href="#poseta">Pronađite nas <span aria-hidden="true">↗</span></a>
           </div>
         </div>
       </div>
@@ -152,6 +133,29 @@ async function submitReservation() {
         </div>
       </section>
 
+      <section id="pica" class="menu-section drinks-section section-pad">
+        <div class="container">
+          <div class="section-heading text-center">
+            <div class="eyebrow eyebrow-green"><span class="eyebrow-line"></span> KUTAK GASTRO BAR <span class="eyebrow-line"></span></div>
+            <h2>Karta <em>pića.</em></h2>
+            <p>Topli napici, sveže ceđeni sokovi, vina i kokteli.</p>
+          </div>
+          <div class="drinks-categories">
+            <section v-for="category in drinkCategories" :key="category.name" class="menu-category">
+              <h3 class="menu-category-title">{{ category.name }}</h3>
+              <article v-for="drink in category.items" :key="drink.id" class="menu-item">
+                <div class="menu-item-heading">
+                  <h4>{{ drink.name }}</h4>
+                  <span class="menu-price">{{ drink.price.toLocaleString('sr-RS') }} <small>RSD</small></span>
+                </div>
+                <p v-if="drink.description" class="menu-description">{{ drink.description }}</p>
+              </article>
+            </section>
+          </div>
+          <div class="text-center menu-footnote">Sve cene su izražene u dinarima.</div>
+        </div>
+      </section>
+
       <section id="prica" class="story-section section-pad">
         <div class="container">
           <div class="row align-items-center gy-5">
@@ -179,34 +183,6 @@ async function submitReservation() {
           <span class="quote-mark">“</span>
           <blockquote>Najlepši razgovori počinju<br />kad stigne <em>hrana na sto.</em></blockquote>
           <div class="quote-sign"><span></span> KUTAK FILOZOFIJA <span></span></div>
-        </div>
-      </section>
-
-      <section id="rezervacija" class="reservation-section section-pad">
-        <div class="container">
-          <div class="row g-0 reservation-wrap">
-            <div class="col-lg-5 reservation-aside">
-              <div class="eyebrow"><span class="eyebrow-line"></span> VAŠ STO VAS ČEKA</div>
-              <h2>Sačuvajte<br />mesto za<br /><em>lepe trenutke.</em></h2>
-              <p>Recite nam kada dolazite. Mi ćemo se pobrinuti za ostalo.</p>
-              <div class="aside-detail"><span>01</span><div><strong>Bez žurbe</strong><small>Vaš sto čuvamo 15 minuta.</small></div></div>
-              <div class="aside-detail"><span>02</span><div><strong>Za posebne prilike</strong><small>Napišite nam želje u napomeni.</small></div></div>
-              <div class="reservation-decoration">K.</div>
-            </div>
-            <div class="col-lg-7 reservation-form-wrap">
-              <div class="form-heading"><span>REZERVACIJA</span><span class="api-status" :class="{ online: apiOnline }"><i></i>{{ apiOnline ? 'SISTEM DOSTUPAN' : 'DEMO PRIKAZ' }}</span></div>
-              <div v-if="notice" class="alert" :class="`alert-${noticeType}`" role="status">{{ notice }}</div>
-              <form class="row g-3" @submit.prevent="submitReservation">
-                <div class="col-md-6"><label class="form-label" for="guest-name">Vaše ime</label><input id="guest-name" v-model.trim="form.name" class="form-control" name="name" autocomplete="name" placeholder="npr. Milica Petrović" required /></div>
-                <div class="col-md-6"><label class="form-label" for="guest-phone">Broj telefona</label><input id="guest-phone" v-model.trim="form.phone" class="form-control" name="phone" type="tel" autocomplete="tel" placeholder="+381 60 123 4567" required /></div>
-                <div class="col-md-6"><label class="form-label" for="reservation-date">Datum</label><input id="reservation-date" v-model="form.date" class="form-control" name="date" type="date" :min="today" required /></div>
-                <div class="col-md-3"><label class="form-label" for="reservation-time">Vreme</label><select id="reservation-time" v-model="form.time" class="form-select" name="time"><option>12:00</option><option>13:00</option><option>14:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select></div>
-                <div class="col-md-3"><label class="form-label" for="guest-count">Osoba</label><select id="guest-count" v-model="form.guests" class="form-select" name="guests"><option v-for="number in 12" :key="number" :value="String(number)">{{ number }}</option></select></div>
-                <div class="col-12"><label class="form-label" for="guest-note">Posebna napomena <span>(opciono)</span></label><textarea id="guest-note" v-model.trim="form.note" class="form-control" name="note" rows="3" placeholder="Proslava, dečja stolica, omiljeni kutak…"></textarea></div>
-                <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-3 form-submit-row"><small>Rezervacija je potvrđena nakon našeg poziva.</small><button class="btn btn-brand btn-lg" type="submit" :disabled="sending"><span v-if="sending" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>{{ sending ? 'Šaljemo…' : 'Pošalji rezervaciju' }} <span v-if="!sending" aria-hidden="true">↗</span></button></div>
-              </form>
-            </div>
-          </div>
         </div>
       </section>
 

@@ -65,7 +65,27 @@
   margin-top: 38px;
 }
 
+.drinks-section {
+  background: #eeefe7;
+}
+
+.drinks-categories {
+  column-count: 2;
+  column-gap: 3rem;
+}
+
+.drinks-categories .menu-category {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 2rem;
+  break-inside: avoid;
+}
+
 @media (max-width: 575.98px) {
+  .drinks-categories {
+    column-count: 1;
+  }
+
   .menu-category-title {
     font-size: 22px;
   }
