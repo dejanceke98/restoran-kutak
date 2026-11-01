@@ -194,10 +194,10 @@ onMounted(async () => {
               <div class="col-sm-6"><span class="detail-number">ADRESA</span><h3>Pronađite nas</h3><p>Bulevar Cara Lazara 19<br />Novi Sad, Srbija</p></div>
               <div class="col-sm-6"><span class="detail-number">RADNO VREME</span><h3>Otvorena vrata</h3><p>Pon–Pet &nbsp; 07:30 – 23:00<br />Sub &nbsp; 08:00 – 00:00<br />ned &nbsp; 08:00 – 23:00</p></div>
               <div class="col-sm-6"><span class="detail-number">POZOVITE</span><h3>Tu smo za vas</h3><a href="tel:+381112345678">+38166-5665-792</a></div>
-              <div class="col-sm-6"><span class="detail-number">ZAPIŠITE</span><h3>Za vašu sledeću posetu</h3><p>Rezervacije primamo i putem forme iznad.</p></div>
+              <div class="col-sm-6"><span class="detail-number">DRUŠTVENE MREŽE</span><h3>Pratite Kutak</h3><a href="https://www.instagram.com/kutak.gastrobar/" target="_blank" rel="noreferrer">@kutak.gastrobar</a></div>
             </div></div>
           </div>
-          <div class="hours-banner"><span class="hours-star">✳</span><span>Dobro društvo, dobra hrana, bez gledanja na sat.</span><a href="#rezervacija">Pronađite svoj sto <span aria-hidden="true">↗</span></a></div>
+          <div class="hours-banner"><span class="hours-star">✳</span><span>Dobro društvo, dobra hrana, bez gledanja na sat.</span><a href="#poseta">Pronađite nas <span aria-hidden="true">↗</span></a></div>
         </div>
       </section>
     </main>
