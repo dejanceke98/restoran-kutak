@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import menuData from '../menu.json'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 const menu = ref([])
@@ -10,12 +11,14 @@ const noticeType = ref('success')
 const today = new Date().toISOString().slice(0, 10)
 const form = reactive({ name: '', phone: '', date: '', time: '19:00', guests: '2', note: '' })
 
-const menuFallback = [
-  { id: 1, category: 'Iz naše kuhinje', name: 'Sporački gulaš', description: 'Juneće meso, domaći njoki i sos koji se krčka satima.', price: 890, tag: 'Kućni favorit', symbol: '🍲' },
-  { id: 2, category: 'Sveže i sezonsko', name: 'Baštenska salata', description: 'Hrskavo povrće, mladi sir, semenke i preliv od začinskog bilja.', price: 620, tag: 'Lagano', symbol: '🥗' },
-  { id: 3, category: 'Za sto koji se deli', name: 'Kutak meze', description: 'Izbor domaćih sireva, namaza, maslina i toplog hleba.', price: 760, tag: 'Za dvoje', symbol: '🫒' },
-]
-
+const menuCategories = computed(() => {
+  const grouped = new Map()
+  for (const dish of menu.value) {
+    if (!grouped.has(dish.category)) grouped.set(dish.category, [])
+    grouped.get(dish.category).push(dish)
+  }
+  return Array.from(grouped, ([name, items]) => ({ name, items }))
+})
 const formattedDate = computed(() => form.date ? new Date(`${form.date}T12:00:00`).toLocaleDateString('sr-RS') : '')
 
 onMounted(async () => {
@@ -28,7 +31,7 @@ onMounted(async () => {
     menu.value = await dishes.json()
     apiOnline.value = true
   } catch {
-    menu.value = menuFallback
+    menu.value = menuData
   }
 })
 
@@ -63,7 +66,7 @@ async function submitReservation() {
       <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="#pocetna" aria-label="Kutak, početna">
           <span class="brand-logo" role="img" aria-label="Kutak Gastro Bar logo"></span>
-          <span class="brand-name">kutak<span class="brand-period">.</span></span>
+          <span class="brand-wordmark"><span class="brand-title"><span>K</span><span class="brand-coffee-u">U</span><span>T</span><span>A</span><span class="brand-reversed-k">K</span></span><span class="brand-subtitle"><i></i>GASTRO BAR<i></i></span></span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Otvori navigaciju">
           <span class="navbar-toggler-icon"></span>
@@ -129,27 +132,23 @@ async function submitReservation() {
       <section id="meni" class="menu-section section-pad">
         <div class="container">
           <div class="section-heading text-center">
-            <div class="eyebrow eyebrow-green"><span class="eyebrow-line"></span> NEŠTO FINO SE KRČKA <span class="eyebrow-line"></span></div>
-            <h2>Sa našeg stola<br />na <em>vaš.</em></h2>
-            <p>Meni koji prati godišnje doba, ali nikad ne zaboravlja klasike.</p>
+            <div class="eyebrow eyebrow-green"><span class="eyebrow-line"></span> KUTAK GASTRO BAR <span class="eyebrow-line"></span></div>
+            <h2>Naš <em>jelovnik.</em></h2>
+            <p>Doručak, omiljeni klasici i nešto slatko za kraj.</p>
           </div>
-          <div class="row g-4 menu-cards">
-            <article v-for="(dish, index) in menu" :key="dish.id" class="col-md-6 col-lg-4">
-              <div class="menu-card h-100">
-                <div class="dish-art" :class="`dish-art-${index + 1}`">
-                  <span class="dish-tag">{{ dish.tag }}</span>
-                  <span class="dish-symbol" aria-hidden="true">{{ dish.symbol }}</span>
-                  <span class="dish-number">0{{ index + 1 }}</span>
+          <div class="menu-categories row g-5">
+            <section v-for="category in menuCategories" :key="category.name" class="col-md-6 menu-category">
+              <h3 class="menu-category-title">{{ category.name }}</h3>
+              <article v-for="dish in category.items" :key="dish.id" class="menu-item">
+                <div class="menu-item-heading">
+                  <h4>{{ dish.name }}</h4>
+                  <span class="menu-price">{{ dish.price.toLocaleString('sr-RS') }} <small>RSD</small></span>
                 </div>
-                <div class="dish-info">
-                  <span class="dish-category">{{ dish.category }}</span>
-                  <div class="d-flex justify-content-between align-items-start gap-3"><h3>{{ dish.name }}</h3><span class="dish-price">{{ dish.price }} <small>RSD</small></span></div>
-                  <p>{{ dish.description }}</p>
-                </div>
-              </div>
-            </article>
+                <p v-if="dish.description" class="menu-description">{{ dish.description }}</p>
+              </article>
+            </section>
           </div>
-          <div class="text-center menu-footnote">Svaki dan pripremamo sveže. Pitajte nas za dnevnu ponudu.</div>
+          <div class="text-center menu-footnote">Sve cene su izražene u dinarima.</div>
         </div>
       </section>
 
@@ -159,7 +158,7 @@ async function submitReservation() {
             <div class="col-lg-6">
               <div class="story-art">
                 <div class="story-frame"><div class="story-arch"><span class="arch-sun"></span><span class="arch-table"></span><span class="arch-vase">✿</span></div></div>
-                <div class="story-stamp"><span>OD</span><strong>2021</strong><span>S LJUBAVLJU</span></div>
+                <div class="story-stamp"><span>OD</span><strong>2026</strong><span>S LJUBAVLJU</span></div>
                 <div class="story-scribble">mali<br />trenuci,<br /><em>veliki</em><br />ukusi.</div>
               </div>
             </div>
@@ -216,10 +215,10 @@ async function submitReservation() {
           <div class="row gy-5">
             <div class="col-lg-5"><div class="eyebrow eyebrow-green"><span class="eyebrow-line"></span> GDE SE VIDIMO?</div><h2>Uvek ima<br />mesta u <em>Kutku.</em></h2><p>Navratite na ručak, ostanite na još jednoj priči.</p></div>
             <div class="col-lg-7"><div class="row g-4 visit-details">
-              <div class="col-sm-6"><span class="detail-number">01 / ADRESA</span><h3>Pronađite nas</h3><p>Ulica Domaćih ukusa 12<br />11000 Beograd, Srbija</p></div>
-              <div class="col-sm-6"><span class="detail-number">02 / RADNO VREME</span><h3>Otvorena vrata</h3><p>Pon–Pet &nbsp; 12:00–22:00<br />Sub–Ned &nbsp; 10:00–23:00</p></div>
-              <div class="col-sm-6"><span class="detail-number">03 / POZOVITE</span><h3>Tu smo za vas</h3><a href="tel:+381112345678">+381 11 234 5678</a></div>
-              <div class="col-sm-6"><span class="detail-number">04 / ZAPIŠITE</span><h3>Za vašu sledeću posetu</h3><p>Rezervacije primamo i putem forme iznad.</p></div>
+              <div class="col-sm-6"><span class="detail-number">ADRESA</span><h3>Pronađite nas</h3><p>Bulevar Cara Lazara 19<br />Novi Sad, Srbija</p></div>
+              <div class="col-sm-6"><span class="detail-number">RADNO VREME</span><h3>Otvorena vrata</h3><p>Pon–Pet &nbsp; 07:30 – 23:00<br />Sub &nbsp; 08:00 – 00:00<br />ned &nbsp; 08:00 – 23:00</p></div>
+              <div class="col-sm-6"><span class="detail-number">POZOVITE</span><h3>Tu smo za vas</h3><a href="tel:+381112345678">+38166-5665-792</a></div>
+              <div class="col-sm-6"><span class="detail-number">ZAPIŠITE</span><h3>Za vašu sledeću posetu</h3><p>Rezervacije primamo i putem forme iznad.</p></div>
             </div></div>
           </div>
           <div class="hours-banner"><span class="hours-star">✳</span><span>Dobro društvo, dobra hrana, bez gledanja na sat.</span><a href="#rezervacija">Pronađite svoj sto <span aria-hidden="true">↗</span></a></div>
@@ -228,7 +227,7 @@ async function submitReservation() {
     </main>
 
     <footer class="site-footer">
-      <div class="container footer-main"><a class="footer-brand" href="#pocetna" aria-label="Kutak, početna"><span class="brand-logo" role="img" aria-label="Kutak Gastro Bar logo"></span><span>kutak<span class="brand-period">.</span></span></a><p>Mali restoran sa velikim srcem.<br />Svratite, osećajte se kao kod kuće.</p><a href="#pocetna" class="back-top">NA VRH ↑</a></div>
+      <div class="container footer-main"><a class="footer-brand" href="#pocetna" aria-label="Kutak, početna"><span class="brand-logo" role="img" aria-label="Kutak Gastro Bar logo"></span><span class="brand-wordmark"><span class="brand-title"><span>K</span><span class="brand-coffee-u">U</span><span>T</span><span>A</span><span class="brand-reversed-k">K</span></span><span class="brand-subtitle"><i></i>GASTRO BAR<i></i></span></span></a><p>Mali restoran sa velikim srcem.<br />Svratite, osećajte se kao kod kuće.</p><a href="#pocetna" class="back-top">NA VRH ↑</a></div>
       <div class="container footer-bottom"><span>© 2026 Kutak. S ljubavlju, za vaš sto.</span><span>DOMAĆE JE UVEK NAJBOLJE <span class="footer-heart">♥</span></span></div>
     </footer>
   </div>

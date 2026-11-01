@@ -1,6 +1,7 @@
 from datetime import datetime
 from email.message import EmailMessage
 from itertools import count
+import json
 import os
 from pathlib import Path
 import smtplib
@@ -18,11 +19,7 @@ CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://12
 reservations = []
 reservation_ids = count(1)
 
-MENU = [
-    {"id": 1, "category": "Iz naše kuhinje", "name": "Sporački gulaš", "description": "Juneće meso, domaći njoki i sos koji se krčka satima.", "price": 890, "tag": "Kućni favorit", "symbol": "🍲"},
-    {"id": 2, "category": "Sveže i sezonsko", "name": "Baštenska salata", "description": "Hrskavo povrće, mladi sir, semenke i preliv od začinskog bilja.", "price": 620, "tag": "Lagano", "symbol": "🥗"},
-    {"id": 3, "category": "Za sto koji se deli", "name": "Kutak meze", "description": "Izbor domaćih sireva, namaza, maslina i toplog hleba.", "price": 760, "tag": "Za dvoje", "symbol": "🫒"},
-]
+MENU = json.loads((Path(__file__).resolve().parent.parent / "menu.json").read_text(encoding="utf-8"))
 
 
 def send_reservation_email(reservation):
